@@ -1,0 +1,8 @@
+name = "xytk"
+main = "src/worker.js"
+compatibility_date = "2024-03-20"
+
+# 仅保留静态资源的绑定
+[assets]
+directory = "./public"
+binding = "ASSETS"
