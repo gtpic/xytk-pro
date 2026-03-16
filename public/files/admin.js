@@ -415,7 +415,7 @@ async function saveSettings() {
     const updates = {};
     ['tg_bot_token', 'tg_chat_id', 'api_key', 'api_upload_category', 'admin_user', 'admin_pass', 'site_favicon', 'storage_provider', 'site_name', 'show_site_name', 'site_logo', 'show_site_logo', 'mobile_sidebar_image'].forEach(key => {
         const el = document.getElementById(`set_${key}`);
-        if(el) updates[key] = el.value.trim();
+        if(el && el.value.trim() !== '') updates[key] = el.value.trim();
     });
     
     ['site_footer_1', 'site_footer_2'].forEach(key => {
