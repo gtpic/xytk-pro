@@ -27,7 +27,8 @@ async function syncSiteInfo() {
     try {
         const res = await fetch(`${apiBaseUrl}/api/public/siteinfo`);
         const info = await res.json();
-        if (info.site_favicon) document.getElementById('dynamic-favicon').href = info.site_favicon; 
+        const faviconUrl = (info.site_favicon && info.site_favicon.trim() !== '') ? info.site_favicon : 'files/xytk.png';
+        document.getElementById('dynamic-favicon').href = faviconUrl;
         if (info.show_site_name === 'on' && info.site_name) {
             document.getElementById('login-site-name').innerText = info.site_name;
             document.getElementById('login-site-name').style.display = 'block';
@@ -38,12 +39,13 @@ async function syncSiteInfo() {
             const mobileText = document.getElementById('mobile-logo-text'); if(mobileText) mobileText.style.display = 'none';
         }
         
-        if (info.show_site_logo === 'on' && info.site_logo) {
+        if (info.show_site_logo === 'on') {
+            const logoSrc = (info.site_logo && info.site_logo.trim() !== '') ? info.site_logo : 'files/logo.png';
             const logoImg = document.getElementById('login-site-logo');
-            logoImg.src = info.site_logo;
+            logoImg.src = logoSrc;
             logoImg.style.display = 'block';
             const mobileLogo = document.getElementById('mobile-logo-img');
-            if(mobileLogo) { mobileLogo.src = info.site_logo; mobileLogo.style.display = 'block'; }
+            if(mobileLogo) { mobileLogo.src = logoSrc; mobileLogo.style.display = 'block'; }
         }
     } catch (err) { 
         console.error("加载网站信息失败"); 
@@ -415,9 +417,14 @@ async function saveSettings() {
     const updates = {};
     ['tg_bot_token', 'tg_chat_id', 'api_key', 'api_upload_category', 'admin_user', 'admin_pass', 'site_favicon', 'storage_provider', 'site_name', 'show_site_name', 'site_logo', 'show_site_logo', 'mobile_sidebar_image'].forEach(key => {
         const el = document.getElementById(`set_${key}`);
-        if(el && el.value.trim() !== '') updates[key] = el.value.trim();
+        if (el) {
+            if (key === 'admin_pass') {
+                if (el.value.trim() !== '') updates[key] = el.value.trim();
+            } else {
+                updates[key] = el.value.trim();
+            }
+        }
     });
-    
     ['site_footer_1', 'site_footer_2'].forEach(key => {
         const el = document.getElementById(`set_${key}`);
         if(el) updates[key] = el.value;
