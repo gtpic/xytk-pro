@@ -13,7 +13,7 @@ async function syncFavicon() {
     try {
         const infoRes = await fetch(`${API_BASE}/api/public/siteinfo`);
         const infoData = await infoRes.json();
-        globalMobileSidebarImg = infoData.mobile_sidebar_image || '';
+        globalMobileSidebarImg = (infoData.mobile_sidebar_image && infoData.mobile_sidebar_image.trim() !== '') ? infoData.mobile_sidebar_image : 'files/bg.jpg';
         
         // 1. 设置网站名称
         if (infoData.show_site_name === 'on' && infoData.site_name) {
@@ -25,9 +25,9 @@ async function syncFavicon() {
         }
 
         // 2. 设置网站 Logo
-        if (infoData.show_site_logo === 'on' && infoData.site_logo) {
+        if (infoData.show_site_logo === 'on') {
             const logoImg = document.getElementById('site-logo');
-            logoImg.src = infoData.site_logo;
+            logoImg.src = (infoData.site_logo && infoData.site_logo.trim() !== '') ? infoData.site_logo : 'files/logo.png';
             logoImg.style.display = 'block';
         }
         
@@ -36,14 +36,13 @@ async function syncFavicon() {
         if (infoData.site_footer_2) document.getElementById('footer-part2').innerHTML = infoData.site_footer_2;
 
         // 4. 设置网页标签图标 (Favicon)
-        if (infoData.site_favicon) {
-            const newLink = document.createElement('link');
-            newLink.id = 'dynamic-favicon';
-            newLink.rel = 'icon';
-            newLink.href = infoData.site_favicon;
-            document.head.appendChild(newLink);
-        }
-    } catch (err) { 
+        const faviconUrl = (infoData.site_favicon && infoData.site_favicon.trim() !== '') ? infoData.site_favicon : 'files/xytk.png';
+        const newLink = document.createElement('link');
+        newLink.id = 'dynamic-favicon';
+        newLink.rel = 'icon';
+        newLink.href = faviconUrl;
+        document.head.appendChild(newLink);
+    } catch (err) {
         console.error("加载网站图标及信息失败"); 
     }
 }
