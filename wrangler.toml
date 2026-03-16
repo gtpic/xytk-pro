@@ -1,4 +1,4 @@
-name = "xytk"
+name = "xytk-por"
 main = "src/worker.js"
 compatibility_date = "2024-03-20"
 
