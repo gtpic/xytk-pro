@@ -180,6 +180,31 @@ export default {
           .bind(filename, description, file_id).run();
         return jsonResponse({ success: true });
       }
+      if (url.pathname === '/api/external/delete' && request.method === 'POST') {
+        try {
+          const { url: imgUrl } = await request.json();
+          if (!imgUrl) return jsonResponse({ error: 'Missing url parameter' }, 400);
+          const match = imgUrl.match(/\/image\/([^\.]+)/);
+          if (!match) return jsonResponse({ error: 'Invalid url format' }, 400);
+          const file_id = match[1];
+          const record = await env.db.prepare("SELECT id, file_id, message_id FROM images WHERE file_id = ?").bind(file_id).first();
+          if (record) {
+            if (record.message_id === 0) {
+              if (env.r2) await env.r2.delete(record.file_id);
+            } else {
+              await fetch(`https://api.telegram.org/bot${config.tg_bot_token}/deleteMessage`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: config.tg_chat_id, message_id: record.message_id })
+              });
+            }
+            if (env.kv) await env.kv.delete(record.file_id);
+            await env.db.prepare("DELETE FROM images WHERE id = ?").bind(record.id).run();
+          }
+          return jsonResponse({ success: true, message: "Deleted successfully" });
+        } catch (err) { 
+          return jsonResponse({ error: err.message }, 500); 
+        }
+      }
     }
     if (url.pathname.startsWith('/api/admin/')) {
       const authHeader = request.headers.get('Authorization');
